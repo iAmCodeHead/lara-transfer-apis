@@ -48,7 +48,7 @@ class AuthService
         return [
             'status' => true,
             'message' => 'User logged in',
-            'data' => [$user, 'token' => $token, 'token_type' => 'Bearer']
+            'data' => [$user[0], 'token' => $token, 'token_type' => 'Bearer']
         ];
     }
 }

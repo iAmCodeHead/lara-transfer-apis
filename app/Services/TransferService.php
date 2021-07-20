@@ -27,6 +27,16 @@ class TransferService
 
         try {
 
+            $hasSufficientFunds = $this->checkAccountBalance($user, $amount);
+
+            if(!$hasSufficientFunds){
+                return [
+                    'status' => false,
+                    'message' => 'Insufficient funds',
+                    'data' => []
+                ];
+            }
+
             $response = $this->validateAccountNumber($accountNumber, $bankCode);
 
             if ($response->status == true) {
@@ -58,6 +68,17 @@ class TransferService
 
         }
 
+    }
+
+    private function checkAccountBalance($user, $amount)
+    {
+        $currentBalance = $user->account->account_balance;
+
+        if($amount > $currentBalance){
+            return false;
+        }
+
+        return true;
     }
 
     private function validateAccountNumber($accountNumber, $bankCode)

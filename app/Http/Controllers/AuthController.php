@@ -18,11 +18,16 @@ class AuthController extends Controller
 
         $response = $authService->registerUser($fields);
 
-        return response()->json($response, 201);
+        return response()->json($response, $response['statusCode']);
     }
 
     public function login(Request $request, AuthService $authService)
     {
+
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
 
         $loginResponse = $authService->userLogin($request);
 

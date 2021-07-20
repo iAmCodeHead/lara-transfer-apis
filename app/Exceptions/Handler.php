@@ -47,6 +47,7 @@ class Handler extends ExceptionHandler
         if ($e instanceof ValidationException) {
 
             return response()->json([
+                'status' => false,
                 'data' => $request->input(),
                 'message' => Arr::flatten($e->errors())[0]
             ], 422);
@@ -54,6 +55,7 @@ class Handler extends ExceptionHandler
         }
 
         return response()->json([
+            'status' => false,
             'data' => $request->input(),
             'message' => $e->getMessage()
         ], 400);

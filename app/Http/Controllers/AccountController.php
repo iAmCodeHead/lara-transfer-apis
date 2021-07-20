@@ -18,14 +18,14 @@ class AccountController extends Controller
     {
         $loggedInUser = $request->user();
 
-        $fields = $request->validate([
+        $request->validate([
             'account_name' => 'required|string',
-            'account_number' => 'required|digits:10',
+            'account_number' => 'required|digits:10|unique:account_details',
             'bank_name' => 'required|string',
             'account_balance' => 'nullable|integer'
         ]);
 
-        $newUser = $accountService->createAccount($fields, $loggedInUser);
+        $newUser = $accountService->createAccount($request, $loggedInUser);
 
         return response()->json($newUser, $newUser['statusCode']);
     }

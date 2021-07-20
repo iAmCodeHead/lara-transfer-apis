@@ -31,7 +31,7 @@ class TransactionsController extends Controller
     /**
      * search for specified resource from storage.
      *
-     * @param  date  $date
+     * @param  amount  $amount
      * @return \Illuminate\Http\Response
      */
     public function search($transactionAmount, TransactionService $transactionService)

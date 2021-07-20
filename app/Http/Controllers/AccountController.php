@@ -27,7 +27,7 @@ class AccountController extends Controller
 
         $newUser = $accountService->createAccount($fields, $loggedInUser);
 
-        return response()->json($newUser, 200);
+        return response()->json($newUser, $newUser['statusCode']);
     }
 
 }

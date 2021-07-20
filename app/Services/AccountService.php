@@ -21,6 +21,7 @@ class AccountService
 
         return [
             'status' => true,
+            'statusCode' => 200,
             'message' => 'Account successfully created',
             'data' => $account
         ];

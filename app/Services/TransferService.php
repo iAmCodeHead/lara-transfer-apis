@@ -143,7 +143,12 @@ class TransferService
 
             $body = $response->object();
 
-            return $body->data;
+            return [
+                'status' => true,
+                'statusCode' => 200,
+                'message' => 'All Banks',
+                'data' => $body->data
+            ];
 
     }
 }

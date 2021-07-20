@@ -26,7 +26,7 @@ class AuthController extends Controller
 
         $loginResponse = $authService->userLogin($request);
 
-        return response()->json($loginResponse, 200);
+        return response()->json($loginResponse, $loginResponse['statusCode']);
     }
 
     public function logout()

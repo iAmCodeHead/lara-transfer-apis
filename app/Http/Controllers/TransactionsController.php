@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Services\TransactionService;
+use App\Services\TransactionsService;
 use Illuminate\Http\Request;
 
 class TransactionsController extends Controller
@@ -13,22 +13,15 @@ class TransactionsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request,TransactionService $transactionService)
+    public function show(Request $request,TransactionsService $transactionsService)
     {
         $loggedInUser = $request->user()->id;
 
         $transactionAmount = $request->input('amount');
-
-        if($transactionAmount){
-
-            return $transactionService->searchTransactionByAmount($transactionAmount, $loggedInUser);
-
-        } else {
-
-            return $transactionService->getTransactionsForLoggedInUser($loggedInUser);
-
-        }
         
+        $transactions = $transactionsService->getTransactionsForLoggedInUser($loggedInUser, $transactionAmount);
+       
+        return response()->json($transactions, $transactions['statusCode']);
 
     }
 

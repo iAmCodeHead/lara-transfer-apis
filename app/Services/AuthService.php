@@ -38,6 +38,7 @@ class AuthService
 
         return [
             'status' => false,
+            'statusCode' => 400,
             'message' => 'User already exists'
         ];
     }
@@ -47,6 +48,7 @@ class AuthService
         if (!Auth::attempt($credentials->only('email', 'password'))) {
             return [
                 'status' => false,
+                'statusCode' => 400,
                 'message' => 'Invalid login details'
             ];
         }
@@ -57,6 +59,7 @@ class AuthService
 
         return [
             'status' => true,
+            'statusCode' => 200,
             'message' => 'User logged in',
             'data' => ['user' => $user, 'token' => $token, 'token_type' => 'Bearer']
         ];

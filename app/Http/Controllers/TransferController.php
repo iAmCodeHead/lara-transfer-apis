@@ -15,7 +15,7 @@ class TransferController extends Controller
         $fields = $request->validate([
             'account_number' => 'required|digits:10',
             'bank_code' => 'required|string',
-            'amount' => 'required|integer',
+            'amount' => 'required|numeric|min:1',
             'reason' => 'nullable|string'
         ]);
 
@@ -26,7 +26,7 @@ class TransferController extends Controller
             $fields['reason']
         );
 
-        return response()->json($transferResponse, 200);
+        return response()->json($transferResponse, $transferResponse['statusCode']);
 
     }
 

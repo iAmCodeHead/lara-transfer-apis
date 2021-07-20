@@ -60,11 +60,11 @@ class TransferService
 
             }
 
-            return ['status' => false, 'message' => 'Could not resolve account details. Please try again.'];
+            return ['status' => false, 'message' => 'Could not resolve account details. Please try again.', 'statusCode' => 400];
 
         } catch (\Exception $e) {
 
-            return ['message' => 'Failed to complete transfer request. Please try again.'];
+            return ['message' => 'Failed to complete transfer request. Please try again.', 'statusCode' => 500];
 
         }
 

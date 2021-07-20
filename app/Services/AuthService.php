@@ -17,18 +17,28 @@ class AuthService
 
     public function registerUser($fields)
     {
-        $user = User::create([
-            'name' => $fields['name'],
-            'email' => $fields['email'],
-            'password' => bcrypt($fields['password'])
-        ]);
+        $userExists = User::where('email', $fields['email'])
+                            ->where('name', $fields['name']);
 
-        $token = $this->tokenGenerator($user);
+        if(!$userExists){
+            $user = User::create([
+                'name' => $fields['name'],
+                'email' => $fields['email'],
+                'password' => bcrypt($fields['password'])
+            ]);
+    
+            $token = $this->tokenGenerator($user);
+    
+            return [
+                'status' => true,
+                'message' => 'User registration successful',
+                'data' => [$user, 'token' => $token, 'token_type' => 'Bearer']
+            ];
+        }
 
         return [
-            'status' => true,
-            'message' => 'User registration successful',
-            'data' => [$user, 'token' => $token, 'token_type' => 'Bearer']
+            'status' => false,
+            'message' => 'User already exists'
         ];
     }
 
@@ -48,7 +58,7 @@ class AuthService
         return [
             'status' => true,
             'message' => 'User logged in',
-            'data' => [$user[0], 'token' => $token, 'token_type' => 'Bearer']
+            'data' => ['user' => $user, 'token' => $token, 'token_type' => 'Bearer']
         ];
     }
 }

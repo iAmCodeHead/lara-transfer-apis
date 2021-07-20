@@ -21,8 +21,6 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::get('/transactions', [TransactionsController::class, 'show']);
 
-    Route::get('/transactions/search/{transaction_amount}', [TransactionsController::class, 'search']);
-
     Route::get('/banks', [TransferController::class, 'getBanks']);
 
     Route::post('/transfer', [TransferController::class, 'initiate']);

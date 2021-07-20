@@ -50,7 +50,7 @@ class TransferService
                 $transfer = $this->makePaystackTransfer($transferRecipient, $amount, $reason);
 
 
-                $newAccountDetails = $this->updateTransaction($user, $transfer, $amount, $reason);
+                $newAccountDetails = $this->updateAccountBalance($user, $transfer, $amount, $reason);
 
                 return [
                     'status' => true,
@@ -119,7 +119,7 @@ class TransferService
         return $body->data;
     }
 
-    private function updateTransaction($user, $transfer, $amount, $reason)
+    private function updateAccountBalance($user, $transfer, $amount, $reason)
     {
         $currentBalance = $user->account->account_balance;
 

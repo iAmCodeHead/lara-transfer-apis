@@ -12,7 +12,7 @@ class TransactionService
     {
         $transactions = Transactions::where('user_id', $loggedInUser)
                                     ->orderBy('created_at','desc')
-                                    ->get();
+                                    ->simplePaginate(10);
 
         return [
             'status' => true,
@@ -24,7 +24,7 @@ class TransactionService
     public function searchTransactionByAmount($transactionAmount, $loggedInUser)
     {
         $transactions = Transactions::where('transaction_amount', 'like', '%'.$transactionAmount.'%')
-            ->where('user_id', $loggedInUser)->get();
+            ->where('user_id', $loggedInUser)->simplePaginate(10);
 
         return [
             'status' => true,

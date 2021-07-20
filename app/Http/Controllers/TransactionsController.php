@@ -6,12 +6,6 @@ use Illuminate\Http\Request;
 
 class TransactionsController extends Controller
 {
-    protected $request;
-
-    public function __construct(Request $request)
-    {
-        $this->request = $request;
-    }
 
     /**
      * Display the specified resource.
@@ -19,25 +13,23 @@ class TransactionsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(TransactionService $transactionService)
+    public function show(Request $request,TransactionService $transactionService)
     {
-        $loggedInUser = $this->request->user()->id;
+        $loggedInUser = $request->user()->id;
 
-        return $transactionService->getTransactionsForLoggedInUser($loggedInUser);
+        $transactionAmount = $request->input('amount');
+
+        if($transactionAmount){
+
+            return $transactionService->searchTransactionByAmount($transactionAmount, $loggedInUser);
+
+        } else {
+
+            return $transactionService->getTransactionsForLoggedInUser($loggedInUser);
+
+        }
+        
 
     }
 
-
-    /**
-     * search for specified resource from storage.
-     *
-     * @param  amount  $amount
-     * @return \Illuminate\Http\Response
-     */
-    public function search($transactionAmount, TransactionService $transactionService)
-    {
-        $loggedInUser = $this->request->user()->id;
-
-        return $transactionService->searchTransactionByAmount($transactionAmount, $loggedInUser);
-    }
 }

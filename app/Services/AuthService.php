@@ -18,7 +18,7 @@ class AuthService
     public function registerUser($fields)
     {
         $userExists = User::where('email', $fields['email'])
-                            ->where('name', $fields['name']);
+                            ->where('name', $fields['name'])->first();
 
         if(!$userExists){
             $user = User::create([
@@ -31,6 +31,7 @@ class AuthService
     
             return [
                 'status' => true,
+                'statusCode' => 200,
                 'message' => 'User registration successful',
                 'data' => [$user, 'token' => $token, 'token_type' => 'Bearer']
             ];

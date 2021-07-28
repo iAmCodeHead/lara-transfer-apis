@@ -19,14 +19,14 @@ class TransferController extends Controller
             'reason' => 'nullable|string'
         ]);
 
-        $transferResponse = $transferService->initiate(
+        $transferService->initiate(
             $loggedInUser,
             $fields['account_number'],
             $fields['bank_code'], $fields['amount'],
             $fields['reason']
         );
 
-        return response()->json($transferResponse, $transferResponse['statusCode']);
+        return response()->json(['status' => true, 'message' => 'Transfer successful']);
 
     }
 
@@ -34,7 +34,7 @@ class TransferController extends Controller
     {
        $bankCodes = $transferService->getBankCodes();
 
-       return response()->json($bankCodes, $bankCodes['statusCode']);
+       return response()->json(['status' => true, 'message' => 'Fetch all banks','data' => $bankCodes]);
 
     }
 }

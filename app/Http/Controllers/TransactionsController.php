@@ -17,11 +17,13 @@ class TransactionsController extends Controller
     {
         $loggedInUser = $request->user()->id;
 
-        $transactionAmount = $request->input('amount');
+        $from = $request->input('from');
         
-        $transactions = $transactionsService->getTransactionsForLoggedInUser($loggedInUser, $transactionAmount);
+        $to = $request->input('to');
+
+        $transactions = $transactionsService->getTransactionsForLoggedInUser($loggedInUser, $from, $to);
        
-        return response()->json($transactions, $transactions['statusCode']);
+        return response()->json(['status' => true, 'message' => 'Fetch transactions','data' => $transactions]);
 
     }
 

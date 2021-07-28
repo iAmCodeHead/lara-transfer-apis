@@ -2,10 +2,13 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Throwable;
+use UnexpectedValueException;
 
 class Handler extends ExceptionHandler
 {
@@ -45,19 +48,30 @@ class Handler extends ExceptionHandler
     {
 
         if ($e instanceof ValidationException) {
-
-            return response()->json([
-                'status' => false,
-                'data' => $request->input(),
-                'message' => Arr::flatten($e->errors())[0]
-            ], 422);
+     
+            return response()->json(['status' => false, 'data' => $request->input(), 'message' => Arr::flatten($e->errors())[0]], 422);
 
         }
+        
+        if ($e instanceof AuthenticationException) {
+     
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 401);
 
-        return response()->json([
-            'status' => false,
-            'data' => $request->input(),
-            'message' => $e->getMessage()
-        ], 400);
+        }
+        
+        if ($e instanceof ModelNotFoundException) {
+     
+            return response()->json(['status' => false, 'error' => 'Entry for '.str_replace('App\\', '', $e->getModel()).' not found'], 404);
+        
+        }
+        
+        if($e instanceof UnexpectedValueException) {
+     
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 400);
+     
+        }
+
+        return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
+        
     }
 }

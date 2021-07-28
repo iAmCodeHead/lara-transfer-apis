@@ -4,21 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Services\AuthService;
 use Illuminate\Http\Request;
-
 class AuthController extends Controller
 {
     public function register(Request $request, AuthService $authService)
     {
 
-        $fields = $request->validate([
+        $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|confirmed'
         ]);
 
-        $response = $authService->registerUser($fields);
+        $response = $authService->registerUser($request);
 
-        return response()->json($response, $response['statusCode']);
+        return response()->json(['status' => true, 'message' => 'User registration successful','data' => $response]);
     }
 
     public function login(Request $request, AuthService $authService)
@@ -31,13 +30,15 @@ class AuthController extends Controller
 
         $loginResponse = $authService->userLogin($request);
 
-        return response()->json($loginResponse, $loginResponse['statusCode']);
+        return response()->json(['status' => true, 'message' => 'User login successful','data' => $loginResponse]);
     }
 
     public function logout()
     {
-        auth()->user()->tokens()->delete();
 
-        return ['message' => 'User logged out'];
+        auth()->logout();
+
+        return response()->json(['status' => true ,'message' => 'User logged out']);
+
     }
 }

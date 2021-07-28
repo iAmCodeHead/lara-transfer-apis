@@ -5,7 +5,10 @@ namespace App\Services;
 
 
 use App\Models\Transactions;
+use Exception;
 use Illuminate\Support\Facades\Http;
+use UnexpectedValueException;
+
 
 class TransferService
 {
@@ -25,57 +28,36 @@ class TransferService
     public function initiate($user, $accountNumber, $bankCode, $amount, $reason)
     {
 
-        try {
-
-            $hasSufficientFunds = $this->checkAccountBalance($user, $amount);
-
-            if(!$hasSufficientFunds){
-                return [
-                    'status' => false,
-                    'message' => 'Insufficient funds',
-                    'data' => []
-                ];
-            }
+            $this->checkAccountBalance($user, $amount);
 
             $response = $this->validateAccountNumber($accountNumber, $bankCode);
 
-            if ($response->status == true) {
+            $transferData = [
+                'bank_code' => $bankCode,
+                'account_number' => $response->data->account_number,
+                'account_name' => $response->data->account_name
+            ];
 
-                $transferRecipient = $this->createPaystackTransferRecipient([
-                    'bank_code' => $bankCode,
-                    'account_number' => $response->data->account_number,
-                    'account_name' => $response->data->account_name
-                ]);
+            $transferRecipient = $this->createPaystackTransferRecipient($transferData);
 
-                $transfer = $this->makePaystackTransfer($transferRecipient, $amount, $reason);
+            $transfer = $this->makePaystackTransfer($transferRecipient, $amount, $reason);
 
+            $newAccountDetails = $this->updateAccountBalance($user, $transfer, $amount, $reason);
 
-                $newAccountDetails = $this->updateAccountBalance($user, $transfer, $amount, $reason);
+            return $newAccountDetails;
 
-                return [
-                    'status' => true,
-                    'message' => 'Transfer successful',
-                    'data' => $newAccountDetails
-                ];
-
-            }
-
-            return ['status' => false, 'message' => 'Could not resolve account details. Please try again.', 'statusCode' => 400];
-
-        } catch (\Exception $e) {
-
-            return ['message' => 'Failed to complete transfer request. Please try again.', 'statusCode' => 500];
-
-        }
 
     }
 
     private function checkAccountBalance($user, $amount)
     {
+        
         $currentBalance = $user->account->account_balance;
 
         if($amount > $currentBalance){
-            return false;
+
+            throw new UnexpectedValueException('Insffucient Funds');
+
         }
 
         return true;
@@ -86,6 +68,12 @@ class TransferService
         $response = $this->client->get('/bank/resolve?account_number=' . $accountNumber . '&bank_code=' . $bankCode);
 
         $body = $response->object();
+
+        if ($body->status == false) {
+        
+            throw new UnexpectedValueException('Could not resolve account details. Please try again');
+        
+        }
 
         return $body;
     }
@@ -102,6 +90,12 @@ class TransferService
 
         $body = $response->object();
 
+        if ($body->status == false) {
+            
+            throw new Exception('Failed to create recipient. Please try again');
+        
+        }
+
         return $body->data;
     }
 
@@ -109,18 +103,25 @@ class TransferService
     {
         $response = $this->client->post('/transfer', [
             "source" => "balance",
-            "amount" => ($amount * 100),  //paystack charges in kobo, multiply by 100 to get exact value in naira
+            "amount" => $amount,
             "recipient" => $recipient->recipient_code,
             "reason" => $reason
         ]);
 
         $body = $response->object();
 
+        if ($body->status == false) {
+            
+            throw new Exception('Failed to Make transfer. Please try again');
+            
+        }
+
         return $body->data;
     }
 
     private function updateAccountBalance($user, $transfer, $amount, $reason)
     {
+
         $currentBalance = $user->account->account_balance;
 
         Transactions::create([
@@ -143,12 +144,13 @@ class TransferService
 
             $body = $response->object();
 
-            return [
-                'status' => true,
-                'statusCode' => 200,
-                'message' => 'All Banks',
-                'data' => $body->data
-            ];
+            if ($body->status == false) {
+                
+                throw new Exception('Failed to get banks. Please try again');
+            
+            }
+
+            return  $body->data;
 
     }
 }

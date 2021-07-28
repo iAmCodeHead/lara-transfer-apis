@@ -13,7 +13,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 //Protected Routes
-Route::group(['middleware' => ['auth:sanctum']], function(){
+Route::group(['middleware' => ['auth:api']], function(){
 
     Route::post('/account', [AccountController::class, 'store']);
 
@@ -26,4 +26,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('/transfer', [TransferController::class, 'initiate']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+Route::fallback(function(){
+    return response()->json(['status' => false, 'message' => 'This Route does not exist. Be sure you are calling the right method with no typo'], 404);
 });

@@ -8,20 +8,15 @@ use App\Models\Transactions;
 
 class TransactionsService
 {
-    public function getTransactionsForLoggedInUser($loggedInUser, $amount = null)
+    public function getTransactionsForLoggedInUser($loggedInUser, $from = null, $to = null)
     {
         $transactions = Transactions::where('user_id', $loggedInUser)
-                        ->when($amount, function ($query) use($amount){
-                             return $query->where('transaction_amount', 'like', '%' . $amount . '%');
-                        })
-                        ->orderBy('created_at','desc')
-                        ->simplePaginate(10);
+        ->when(($from > 1), function ($query) use($from, $to){
+                return $query->whereBetween('transaction_amount',[$from, $to]);
+        })
+        ->orderBy('created_at','desc')
+        ->simplePaginate(10);
 
-        return [
-            'status' => true,
-            'statusCode' => 200,
-            'message' => 'All transactions',
-            'data' => $transactions
-        ];
+        return $transactions;
     }
 }

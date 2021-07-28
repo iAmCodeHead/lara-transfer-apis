@@ -32,6 +32,8 @@ class TransferService
 
             $response = $this->validateAccountNumber($accountNumber, $bankCode);
 
+            $newTransaction = $this->debitWallet($user, $amount, $reason);
+
             $transferData = [
                 'bank_code' => $bankCode,
                 'account_number' => $response->data->account_number,
@@ -40,11 +42,23 @@ class TransferService
 
             $transferRecipient = $this->createPaystackTransferRecipient($transferData);
 
-            $transfer = $this->makePaystackTransfer($transferRecipient, $amount, $reason);
+            try {
 
-            $newAccountDetails = $this->updateAccountBalance($user, $transfer, $amount, $reason);
+               $transfer = $this->makePaystackTransfer($transferRecipient, $amount, $reason);
 
-            return $newAccountDetails;
+               $newTransaction->update([
+                   'status' => 'success',
+                   'reference' => $transfer->reference
+                ]);
+               
+            } catch (\Throwable $th) {
+                
+                // save failed job for retry
+
+            }
+
+            
+            return $newTransaction;
 
 
     }
@@ -61,6 +75,25 @@ class TransferService
         }
 
         return true;
+    }
+
+    private function debitWallet($user, $amount, $reason)
+    {
+        $currentBalance = $user->account->account_balance;
+
+        $newTransaction = Transactions::create([
+            'user_id' => $user->id,
+            'type' => 'debit',
+            'amount' => $amount,
+            'status' => 'pending',
+            'reason' => $reason,
+            'account_balance' => $newBalance = ($currentBalance - $amount)
+        ]);
+
+        $user->account()->update(['account_balance' => $newBalance]);
+        
+        return $newTransaction;
+
     }
 
     private function validateAccountNumber($accountNumber, $bankCode)
@@ -117,25 +150,6 @@ class TransferService
         }
 
         return $body->data;
-    }
-
-    private function updateAccountBalance($user, $transfer, $amount, $reason)
-    {
-
-        $currentBalance = $user->account->account_balance;
-
-        Transactions::create([
-            'user_id' => $user->id,
-            'transaction_type' => 'transfer',
-            'transaction_amount' => $amount,
-            'transaction_status' => $transfer->status,
-            'transfer_code' => $transfer->transfer_code,
-            'reason' => $reason,
-            'transaction_reference' => $transfer->reference,
-            'account_balance' => $newBalance = ($currentBalance - $amount)
-        ]);
-
-        return $user->account()->update(['account_balance' => $newBalance]);
     }
 
     public function getBankCodes()

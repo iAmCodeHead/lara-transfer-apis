@@ -19,14 +19,20 @@ class TransferController extends Controller
             'reason' => 'nullable|string'
         ]);
 
-        $transferService->initiate(
+        $transaction = $transferService->initiate(
             $loggedInUser,
             $fields['account_number'],
             $fields['bank_code'], $fields['amount'],
             $fields['reason']
         );
 
-        return response()->json(['status' => true, 'message' => 'Transfer successful']);
+        if($transaction->status == 'success'){
+
+            return response()->json(['status' => true, 'message' => 'Transfer successful']);
+
+        }
+
+        return response()->json(['status' => true, 'message' => 'Transfer queued']);
 
     }
 

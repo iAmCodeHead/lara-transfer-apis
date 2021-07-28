@@ -10,12 +10,11 @@ class Transactions extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'transaction_type',
-        'transaction_amount',
-        'transaction_status',
-        'transfer_code',
+        'type',
+        'amount',
+        'status',
         'reason',
-        'transaction_reference',
+        'reference',
         'account_balance'
     ];
 }
